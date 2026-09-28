@@ -283,32 +283,23 @@ function updateSparkle(){
 
 // ===== Background rendering =====
 function drawBgOutside(){
-  // Draw scene with MILD gloom — visible but desaturated and cool
+  // Draw scene with light desaturation — clearly visible but cool-toned
   ctx.save();
   ctx.beginPath();
   ctx.rect(0,0,W,H);
   if(phase==='playing'){
     ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2,true); // inverted clip
   }
-  // Mild gloom: keep brightness so details are visible, desaturate heavily, light cool tint
-  ctx.filter='grayscale(0.65) saturate(0.2) brightness(0.55) contrast(0.85)';
+  // Light desaturation, keep brightness high so every detail is clearly visible
+  ctx.filter='grayscale(0.35) saturate(0.45) brightness(0.85) contrast(0.9)';
   drawSceneImage('dark');
   ctx.filter='none';
-  // Light cold-blue tint — just enough to feel lonely, not enough to hide details
-  ctx.fillStyle='rgba(18,28,55,.32)';ctx.fillRect(0,0,W,H);
-  // Subtle fog (very light)
-  const fogT=Date.now()*0.00015;
-  for(let i=0;i<2;i++){
-    const fy=H*(0.35+i*0.3)+Math.sin(fogT+i)*30;
-    const fg=ctx.createRadialGradient(W*(0.25+0.3*i)+Math.sin(fogT*2+i)*80,fy,0,W*(0.25+0.3*i),fy,W*0.4);
-    fg.addColorStop(0,'rgba(40,55,80,.1)');
-    fg.addColorStop(1,'rgba(40,55,80,0)');
-    ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);
-  }
-  // Very subtle vignette
-  const vig=ctx.createRadialGradient(W/2,H/2,W*0.2,W/2,H/2,Math.max(W,H)*0.75);
+  // Very faint cool tint — just a hint of loneliness, barely noticeable
+  ctx.fillStyle='rgba(20,25,45,.15)';ctx.fillRect(0,0,W,H);
+  // Minimal vignette
+  const vig=ctx.createRadialGradient(W/2,H/2,W*0.25,W/2,H/2,Math.max(W,H)*0.7);
   vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(1,'rgba(0,0,0,.25)');
+  vig.addColorStop(1,'rgba(0,0,0,.12)');
   ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
   ctx.restore();
 }
