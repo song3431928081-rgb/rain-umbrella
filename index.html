@@ -1,44 +1,45 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
-<title>雨中看 · 敞开的红伞</title>
+<title>Through the Mirror</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
-html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
-#cv{display:block;width:100%;height:100%;touch-action:none;background:#2a2a3e}
+html,body{width:100%;height:100%;overflow:hidden;background:#0a0a14;font-family:-apple-system,"Segoe UI","Helvetica Neue",sans-serif}
+#cv{display:block;width:100%;height:100%;touch-action:none;background:#0a0a14}
 
 /* Start overlay */
-#start{position:fixed;inset:0;background:rgba(10,10,25,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity .5s}
+#start{position:fixed;inset:0;background:rgba(8,8,16,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity .6s}
 #start.hidden{opacity:0;pointer-events:none}
-#start h1{font-size:32px;color:#ff4455;margin-bottom:12px;font-weight:800;letter-spacing:2px;text-shadow:0 0 20px rgba(255,68,85,.5)}
-#start .sub{font-size:15px;color:#c0c0d0;margin-bottom:30px;line-height:1.6;text-align:center;padding:0 20px}
-#start .hint{font-size:13px;color:#888;margin-top:20px}
-.btn{background:linear-gradient(135deg,#ff4455,#cc3344);color:#fff;border:none;padding:14px 36px;font-size:16px;font-weight:700;border-radius:28px;cursor:pointer;box-shadow:0 4px 20px rgba(255,68,85,.4);transition:transform .15s,box-shadow .15s}
+#start h1{font-size:30px;color:#e8b85a;margin-bottom:14px;font-weight:800;letter-spacing:3px;text-shadow:0 0 24px rgba(232,184,90,.5)}
+#start .sub{font-size:14px;color:#9aa0b0;margin-bottom:32px;line-height:1.8;text-align:center;padding:0 24px}
+#start .hint{font-size:12px;color:#666;margin-top:20px;letter-spacing:1px}
+.btn{background:linear-gradient(135deg,#d4a040,#a87a20);color:#1a1a2e;border:none;padding:14px 38px;font-size:15px;font-weight:800;border-radius:30px;cursor:pointer;box-shadow:0 4px 24px rgba(212,160,64,.35);transition:transform .15s,box-shadow .15s,filter .15s}
 .btn:active{transform:scale(.95)}
+.btn:hover{filter:brightness(1.1)}
 
 /* Bottom quote */
-#quote{position:fixed;bottom:max(70px,env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:rgba(255,255,255,.8);font-size:13px;padding:0 20px;line-height:1.5;pointer-events:none;z-index:10;font-style:italic;transition:opacity .4s}
+#quote{position:fixed;bottom:max(60px,env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:rgba(220,220,230,.7);font-size:13px;padding:0 20px;line-height:1.7;pointer-events:none;z-index:10;font-style:italic;transition:opacity .5s;text-shadow:0 1px 4px rgba(0,0,0,.8)}
 
 /* Next Scene button */
-#next-btn{position:fixed;top:max(20px,env(safe-area-inset-top));right:20px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);color:#fff;border:1px solid rgba(255,255,255,.3);padding:10px 22px;font-size:14px;border-radius:22px;cursor:pointer;z-index:20;transition:opacity .4s}
+#next-btn{position:fixed;top:max(20px,env(safe-area-inset-top));right:20px;background:rgba(40,35,50,.85);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);color:#e8b85a;border:1px solid rgba(212,160,64,.4);padding:10px 24px;font-size:14px;font-weight:600;border-radius:24px;cursor:pointer;z-index:20;transition:opacity .4s,background .2s}
 #next-btn.hidden{opacity:0;pointer-events:none}
-#next-btn:active{background:rgba(255,255,255,.25)}
+#next-btn:active{background:rgba(60,55,70,.9)}
 
 /* Scene counter */
-#scene-count{position:fixed;top:max(22px,env(safe-area-inset-top));left:20px;color:rgba(255,255,255,.7);font-size:14px;z-index:20;background:rgba(0,0,0,.3);padding:6px 14px;border-radius:16px}
+#scene-count{position:fixed;top:max(22px,env(safe-area-inset-top));left:20px;color:rgba(200,200,210,.85);font-size:13px;font-weight:600;z-index:20;background:rgba(20,18,28,.7);padding:6px 16px;border-radius:18px;backdrop-filter:blur(6px)}
 
 /* End overlay */
-#end{position:fixed;inset:0;background:rgba(10,10,25,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .8s}
+#end{position:fixed;inset:0;background:rgba(8,8,16,.95);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .8s}
 #end.show{opacity:1;pointer-events:auto}
-#end h2{font-size:34px;color:#ffcc00;margin-bottom:12px;font-weight:800;text-shadow:0 0 20px rgba(255,204,0,.5)}
-#end .end-sub{font-size:16px;color:#d0d0e0;margin-bottom:30px}
-#end .final-quote{font-size:14px;color:#b0b0c0;font-style:italic;margin-bottom:28px;padding:0 30px;text-align:center;line-height:1.7;max-width:360px}
+#end h2{font-size:32px;color:#e8b85a;margin-bottom:12px;font-weight:800;text-shadow:0 0 24px rgba(232,184,90,.5);letter-spacing:2px}
+#end .end-sub{font-size:15px;color:#c0c0d0;margin-bottom:28px}
+#end .final-quote{font-size:14px;color:#a0a0b0;font-style:italic;margin-bottom:30px;padding:0 32px;text-align:center;line-height:1.8;max-width:380px}
 
-/* Umbrella indicator (visual hint that umbrella exists) */
-#umbrella-hint{position:fixed;bottom:max(30px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:12px;z-index:10;pointer-events:none;text-align:center;transition:opacity .4s}
-#umbrella-hint.hidden{opacity:0}
+/* Mirror hint */
+#mirror-hint{position:fixed;bottom:max(28px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);color:rgba(180,180,190,.5);font-size:12px;z-index:10;pointer-events:none;text-align:center;letter-spacing:1px;transition:opacity .4s}
+#mirror-hint.hidden{opacity:0}
 </style>
 </head>
 <body>
@@ -47,25 +48,25 @@ html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:
 
 <!-- Start screen -->
 <div id="start">
-  <h1>雨 中 看</h1>
-  <div class="sub">敞开的红伞<br>左右滑动，移动看不见的伞<br>在大雨里，找到温暖的角落</div>
-  <button class="btn" id="start-btn">开 始</button>
-  <div class="hint">☔ 把手指按在屏幕上左右滑 ｜ Discover 3 warm spots</div>
+  <h1>THROUGH THE MIRROR</h1>
+  <div class="sub">Slide your finger to move the magic mirror.<br>On one side — the gray world.<br>On the other — warm light, hidden beauty.<br><br>Find the moments worth reflecting.</div>
+  <button class="btn" id="start-btn">BEGIN</button>
+  <div class="hint">✦ Drag across the screen to move the mirror ｜ 3 reflections await</div>
 </div>
 
 <!-- End screen -->
 <div id="end">
-  <h2>The Rain Has Stopped</h2>
-  <div class="end-sub">We found our warmth in the cold.</div>
-  <div class="final-quote">"我们不能阻止暴雨，但我们可以成为彼此的屋檐。<br>We can't stop the rainstorm, but we can become the eaves of each other."</div>
-  <button class="btn" id="restart-btn">再 来 一 次</button>
+  <h2>THE MIRROR CLEARS</h2>
+  <div class="end-sub">Beauty was always there — we just needed the right lens.</div>
+  <div class="final-quote">"We cannot stop the storm, but we can become each other's shelter."<br>— The reflection we seek is often the one we carry within.</div>
+  <button class="btn" id="restart-btn">REFLECT AGAIN</button>
 </div>
 
 <!-- HUD -->
 <div id="scene-count">1 / 3</div>
-<button id="next-btn">Next →</button>
-<div id="quote">我们不能阻止暴雨，但我们可以成为彼此的屋檐</div>
-<div id="umbrella-hint">← 滑动移动红伞 →</div>
+<button id="next-btn">NEXT →</button>
+<div id="quote">The reflection shows what the eye misses.</div>
+<div id="mirror-hint">← Drag to move the mirror →</div>
 
 <script>
 (()=>{
@@ -77,52 +78,48 @@ let W,H,DPR;
 
 // ===== Scenes =====
 const SCENES=[
-  {id:'street',  title:'雨中的老巷子',   quote:'雨夜里，那盏还亮着的灯笼，是在等谁呢。',   targetX:0.68, targetY:0.55},
-  {id:'bus',     title:'末班车的站台',   quote:'一起挨过这场雨的人，记得要握紧手。',     targetX:0.55, targetY:0.55},
-  {id:'park',    title:'长凳上的黄昏',   quote:'一把伞，两个人，就够撑住整个夜晚。',     targetX:0.62, targetY:0.55},
+  {id:'street',  title:'Scene I · The Lantern Alley',   quote:'"The lamp that still burns at midnight is waiting for someone."',       targetX:0.68, targetY:0.55},
+  {id:'bus',     title:'Scene II · The Last Bus Stop',  quote:'"Those who wait together through the rain, hold each other tighter."', targetX:0.55, targetY:0.55},
+  {id:'park',    title:'Scene III · The Empty Bench',   quote:'"One umbrella, two hearts — enough for the whole cold night."',        targetX:0.62, targetY:0.55},
 ];
-const ENDING={id:'ending',title:'雨停了',quote:'我们不能阻止暴雨，但我们可以成为彼此的屋檐。'};
+const ENDING={id:'ending',title:'Scene IV · After the Storm',quote:'"We cannot stop the storm, but we can become each other\'s shelter."',targetX:0.5,targetY:0.5};
 
 // ===== State =====
 let phase='start'; // start | playing | end
 let sceneIdx=0;
-let umbrellaX, umbrellaY, targetX, targetY;
-let umbrellaRadius;
+let mirrorX, mirrorY;
+let mirrorRadius;
 let raindrops=[];
-let particles=[]; // umbrella glow particles
-let foundCount=0;  // warm spots found in current scene
-let totalFound=0;
+let particles=[];
 let sceneTransition=false;
-let sceneTransitionT=0; // 0→1
+let sceneTransitionT=0;
 
 // ===== Audio =====
 let audioCtx=null;
 function ensureAudio(){
   if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
 }
-function tone(freq,dur,type='sine',vol=.15,delay=0){
+function tone(freq,dur,type='sine',vol=.12,delay=0){
   if(!audioCtx)return;
   setTimeout(()=>{
     const o=audioCtx.createOscillator();const g=audioCtx.createGain();
     o.type=type;o.frequency.value=freq;
     g.gain.setValueAtTime(0,audioCtx.currentTime);
-    g.gain.linearRampToValueAtTime(vol,audioCtx.currentTime+.02);
+    g.gain.linearRampToValueAtTime(vol,audioCtx.currentTime+.03);
     g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);
     o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);
   },delay);
 }
-function sndRain(){tone(1200+Math.random()*400,.08,'white',.02)}
-function sndSpotFound(){
-  tone(660,.12,'sine',.12,0);tone(880,.15,'sine',.12,.10);tone(1320,.2,'sine',.12,.22);
+function sndFound(){
+  tone(523,.18,'sine',.1,0);tone(659,.18,'sine',.1,.12);tone(784,.25,'sine',.1,.24);tone(1046,.3,'triangle',.08,.4);
 }
-function sndNextScene(){tone(440,.15,'triangle',.1,0);tone(550,.15,'triangle',.1,.12);}
+function sndNext(){tone(392,.12,'triangle',.08,0);tone(523,.12,'triangle',.08,.1);tone(659,.15,'triangle',.08,.2);}
 
 // ===== Image loading =====
 const IMAGES={};
 function loadImage(key,url){
   return new Promise(res=>{
     const img=new Image();
-    img.crossOrigin='anonymous';
     img.onload=()=>{IMAGES[key]=img;res(img);};
     img.onerror=()=>{IMAGES[key]=null;res(null);};
     img.src=url;
@@ -136,17 +133,15 @@ function resize(){
   cv.width=W*DPR;cv.height=H*DPR;
   cv.style.width=W+'px';cv.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  umbrellaRadius=Math.min(W,H)*0.22;
+  mirrorRadius=Math.min(W,H)*0.24;
   if(phase==='playing'){
-    targetX=W*SCENES[sceneIdx].targetX;targetY=H*SCENES[sceneIdx].targetY;
-    // smooth umbrella position toward target
-    if(umbrellaX===undefined){umbrellaX=W/2;umbrellaY=H/2;}
+    if(mirrorX===undefined){mirrorX=W/2;mirrorY=H*0.55;}
   }
 }
 window.addEventListener('resize',resize);
 
 // ===== Input =====
-let dragging=false, dragId=null, lastX=0;
+let dragging=false, dragId=null;
 cv.addEventListener('touchstart',onDown,{passive:false});
 cv.addEventListener('touchmove',onMove,{passive:false});
 cv.addEventListener('touchend',onUp);
@@ -158,26 +153,25 @@ function onDown(e){
   if(phase!=='playing')return;
   dragging=true; dragId=e.touches?e.touches[0].identifier:'mouse';
   const p=e.touches?e.touches[0]:e;
-  lastX=umbrellaX=p.clientX; umbrellaY=p.clientY;
+  mirrorX=p.clientX; mirrorY=p.clientY;
 }
 function onMove(e){
   if(!dragging||phase!=='playing')return;
   if(e.touches){
     let t=null;for(const touch of e.touches)if(touch.identifier===dragId){t=touch;break;}
     if(!t)return; e.preventDefault();
-    umbrellaX=t.clientX; umbrellaY=t.clientY;
+    mirrorX=t.clientX; mirrorY=t.clientY;
   }else{
-    umbrellaX=e.clientX; umbrellaY=e.clientY;
+    mirrorX=e.clientX; mirrorY=e.clientY;
   }
-  // Clamp within canvas
-  umbrellaX=Math.max(umbrellaRadius,Math.min(W-umbrellaRadius,umbrellaX));
-  umbrellaY=Math.max(umbrellaRadius*0.8,Math.min(H-umbrellaRadius*0.8,umbrellaY));
-  // Check if umbrella covers warm spot
-  const d=Math.hypot(umbrellaX-targetX,umbrellaY-targetY);
-  if(d<umbrellaRadius*0.5 && !SCENES[sceneIdx].found){
-    SCENES[sceneIdx].found=true; foundCount++; totalFound++;
+  mirrorX=Math.max(mirrorRadius,Math.min(W-mirrorRadius,mirrorX));
+  mirrorY=Math.max(mirrorRadius*0.75,Math.min(H-mirrorRadius*0.75,mirrorY));
+  const tgt=SCENES[sceneIdx];
+  const d=Math.hypot(mirrorX-W*tgt.targetX,mirrorY-H*tgt.targetY);
+  if(d<mirrorRadius*0.45 && !tgt.found){
+    tgt.found=true;
     document.getElementById('next-btn').classList.remove('hidden');
-    sndSpotFound();
+    sndFound();
     updateQuote();
   }
 }
@@ -188,45 +182,43 @@ function onUp(e){
 // ===== Scene management =====
 function startGame(){
   ensureAudio();
-  phase='playing';sceneIdx=0;foundCount=0;totalFound=0;
+  phase='playing';sceneIdx=0;
   SCENES.forEach(s=>s.found=false);
   resize();
   document.getElementById('start').classList.add('hidden');
   document.getElementById('next-btn').classList.add('hidden');
   document.getElementById('scene-count').textContent='1 / '+SCENES.length;
-  document.getElementById('umbrella-hint').classList.remove('hidden');
-  document.getElementById('quote').textContent=SCENES[0].quote;
+  document.getElementById('mirror-hint').classList.remove('hidden');
   updateQuote();
-  setTimeout(()=>document.getElementById('umbrella-hint').classList.add('hidden'),2500);
+  setTimeout(()=>document.getElementById('mirror-hint').classList.add('hidden'),2800);
 }
 function nextScene(){
   if(!SCENES[sceneIdx].found)return;
-  sndNextScene();
+  sndNext();
   sceneTransition=true;sceneTransitionT=0;
   setTimeout(()=>{
     sceneIdx++;
     if(sceneIdx>=SCENES.length){
-      // Ending
       phase='end';
       document.getElementById('end').classList.add('show');
       document.getElementById('next-btn').classList.add('hidden');
       document.getElementById('quote').textContent=ENDING.quote;
+      document.getElementById('scene-count').textContent='END';
       return;
     }
-    foundCount=0;
-    targetX=W*SCENES[sceneIdx].targetX; targetY=H*SCENES[sceneIdx].targetY;
     document.getElementById('scene-count').textContent=(sceneIdx+1)+' / '+SCENES.length;
     document.getElementById('next-btn').classList.add('hidden');
-    document.getElementById('umbrella-hint').classList.remove('hidden');
-    document.getElementById('quote').textContent=SCENES[sceneIdx].quote;
-    setTimeout(()=>document.getElementById('umbrella-hint').classList.add('hidden'),2500);
+    document.getElementById('mirror-hint').classList.remove('hidden');
+    updateQuote();
+    setTimeout(()=>document.getElementById('mirror-hint').classList.add('hidden'),2800);
     sceneTransition=false;
-  },500);
+  },600);
 }
 function updateQuote(){
   const q=document.getElementById('quote');
   q.style.opacity='0';
-  setTimeout(()=>{q.textContent=SCENES[sceneIdx].quote;q.style.opacity='.8';},300);
+  const content=phase==='playing'?SCENES[sceneIdx].quote:ENDING.quote;
+  setTimeout(()=>{q.textContent=content;q.style.opacity='.85';},350);
 }
 function restart(){
   document.getElementById('end').classList.remove('show');
@@ -236,16 +228,16 @@ document.getElementById('start-btn').addEventListener('click',startGame);
 document.getElementById('restart-btn').addEventListener('click',restart);
 document.getElementById('next-btn').addEventListener('click',nextScene);
 
-// ===== Rain particles =====
+// ===== Rain particles (ONLY on the gloom side / outside mirror) =====
 function spawnRain(){
-  for(let i=0;i<3;i++){
+  for(let i=0;i<2;i++){
     raindrops.push({
       x:Math.random()*W,
       y:-10,
-      vy:8+Math.random()*8,
-      vx:-1.5-Math.random()*2,
-      len:10+Math.random()*14,
-      op:.4+Math.random()*.5
+      vy:9+Math.random()*10,
+      vx:-2-Math.random()*3,
+      len:12+Math.random()*16,
+      op:.3+Math.random()*.4
     });
   }
 }
@@ -253,109 +245,86 @@ function updateRain(){
   for(let i=raindrops.length-1;i>=0;i--){
     const r=raindrops[i];
     r.x+=r.vx;r.y+=r.vy;
-    if(r.y>H+20){raindrops.splice(i,1);continue;}
-    // Remove raindrops that fall INTO umbrella circle (creates "dry spot" effect)
+    if(r.y>H+20||r.x<-30){raindrops.splice(i,1);continue;}
+    // Remove raindrops that fall INTO mirror circle (reflects the beauty side — no rain there)
     if(phase==='playing'){
-      const d=Math.hypot(r.x-umbrellaX,r.y-umbrellaY);
-      if(d<umbrellaRadius*0.9)raindrops.splice(i,1);
+      const d=Math.hypot(r.x-mirrorX,r.y-mirrorY);
+      if(d<mirrorRadius*0.92)raindrops.splice(i,1);
     }
   }
-  if(Math.random()<0.9)spawnRain();
-}
-function drawRain(){
-  ctx.strokeStyle='rgba(180,200,230,0.6)';
-  ctx.lineWidth=1.2;
-  ctx.lineCap='round';
-  ctx.beginPath();
-  for(const r of raindrops){
-    ctx.globalAlpha=r.op;
-    ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.vx*2,r.y+r.len);
-  }
-  ctx.stroke();ctx.globalAlpha=1;
+  if(Math.random()<0.85)spawnRain();
 }
 
-// ===== Umbrella glow particles =====
-function spawnGlow(){
+// ===== Sparkle particles (ONLY inside mirror — magic glow) =====
+function spawnSparkle(){
   if(phase!=='playing')return;
   particles.push({
-    x:umbrellaX+(Math.random()-.5)*umbrellaRadius*0.5,
-    y:umbrellaY+(Math.random()-.5)*umbrellaRadius*0.5,
-    vx:(Math.random()-.5)*0.5,
-    vy:-1-Math.random()*1.5,
+    x:mirrorX+(Math.random()-.5)*mirrorRadius*0.6,
+    y:mirrorY+(Math.random()-.5)*mirrorRadius*0.6,
+    vx:(Math.random()-.5)*0.3,
+    vy:-0.8-Math.random()*1.2,
     life:1,
-    size:2+Math.random()*3
+    size:1.5+Math.random()*2.5,
+    hue:40+Math.random()*20
   });
 }
-function updateGlow(){
+function updateSparkle(){
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];
     p.x+=p.vx;p.y+=p.vy;p.life-=.02;
     if(p.life<=0)particles.splice(i,1);
   }
-  if(Math.random()<.4)spawnGlow();
-}
-function drawGlow(){
-  for(const p of particles){
-    ctx.fillStyle=`rgba(255,220,150,${p.life*.8})`;
-    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
-  }
+  if(Math.random()<.5)spawnSparkle();
 }
 
-// ===== Scene rendering =====
-function drawSceneOutside(phase01){
-  // Draw rainy-gray filtered scene OUTSIDE umbrella circle
-  const blur=(1.5+phase01*0);
-  const sat=0.15;
-  const grayscale=0.45;
-  const bright=0.55;
-  const contr=0.85;
-
+// ===== Background rendering =====
+function drawBgOutside(){
+  // Draw scene with HEAVY gloom filter — grayscale, dark, desaturated, slightly blurred
   ctx.save();
-  // Clip to everything EXCEPT umbrella circle (inverted clip)
   ctx.beginPath();
   ctx.rect(0,0,W,H);
   if(phase==='playing'){
-    ctx.arc(umbrellaX,umbrellaY,umbrellaRadius,0,Math.PI*2,true);
+    ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2,true); // inverted clip
   }
-  ctx.clip();
-
-  // Apply rainy filter
-  ctx.filter=`grayscale(${grayscale}) saturate(${sat}) brightness(${bright}) contrast(${contr}) blur(${blur}px)`;
-  drawBackgroundImage();
+  // HEAVY gloom filter for contrast
+  ctx.filter='grayscale(0.95) saturate(0.05) brightness(0.28) contrast(0.7) blur(1.2px)';
+  drawSceneImage();
   ctx.filter='none';
-  // Add rain tint overlay
-  ctx.fillStyle='rgba(30,45,80,.35)';ctx.fillRect(0,0,W,H);
+  // Cold tint overlay — makes outside feel miserable
+  ctx.fillStyle='rgba(10,15,30,.55)';ctx.fillRect(0,0,W,H);
+  // Subtle vignette darkness
+  const vig=ctx.createRadialGradient(W/2,H/2,W*0.2,W/2,H/2,Math.max(W,H)*0.7);
+  vig.addColorStop(0,'rgba(0,0,0,0)');
+  vig.addColorStop(1,'rgba(0,0,0,.35)');
+  ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
   ctx.restore();
 }
 
-function drawSceneInside(){
-  // Draw warm-colorful scene INSIDE umbrella circle
+function drawBgInside(){
+  // Draw scene with WARM VIBRANT filter — the mirror reflects beauty
   ctx.save();
   ctx.beginPath();
-  ctx.arc(umbrellaX,umbrellaY,umbrellaRadius,0,Math.PI*2);
+  ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2);
   ctx.clip();
-  ctx.filter='none'; // warm, no filter
-  drawBackgroundImage();
-  // Add warm glow overlay
-  const glow=ctx.createRadialGradient(umbrellaX,umbrellaY,0,umbrellaX,umbrellaY,umbrellaRadius);
-  glow.addColorStop(0,'rgba(255,200,100,.35)');
-  glow.addColorStop(0.7,'rgba(255,160,60,.15)');
-  glow.addColorStop(1,'rgba(255,100,50,0)');
+  // Vibrant warm filter
+  ctx.filter='grayscale(0) saturate(1.4) brightness(1.15) contrast(1.1)';
+  drawSceneImage();
+  ctx.filter='none';
+  // Warm golden glow overlay — like firelight
+  const glow=ctx.createRadialGradient(mirrorX,mirrorY,0,mirrorX,mirrorY,mirrorRadius);
+  glow.addColorStop(0,'rgba(255,220,140,.4)');
+  glow.addColorStop(0.6,'rgba(255,180,90,.2)');
+  glow.addColorStop(1,'rgba(255,120,60,0)');
   ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
   ctx.restore();
 }
 
-function drawBackgroundImage(){
-  if(phase==='end'){
-    drawEndingBg();return;
-  }
-  if(phase==='start'){
-    drawStartBg();return;
-  }
+function drawSceneImage(){
+  if(phase==='end'){drawEndingBg();return;}
+  if(phase==='start'){drawStartBg();return;}
   const key=SCENES[sceneIdx].id;
   const img=IMAGES[key];
-  if(img && img.complete && img.naturalWidth){
-    // Cover-fit
+  if(img && img.complete && img.naturalWidth>0){
     const ar=img.naturalWidth/img.naturalHeight;
     const cr=W/H;
     let sx,sy,sw,sh;
@@ -363,148 +332,234 @@ function drawBackgroundImage(){
     else{sw=img.naturalWidth;sy=(img.naturalHeight-sw/cr)/2;sh=sw/cr;sx=0;}
     ctx.drawImage(img,sx,sy,sw,sh,0,0,W,H);
   }else{
-    drawProceduralBg();
+    // Fallback procedural — guaranteed to show something
+    drawProceduralFallback();
   }
 }
 
-function drawProceduralBg(){
-  // Fallback: animated night scene
+function drawProceduralFallback(){
+  // Dark city silhouette fallback
   const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#0a1025');g.addColorStop(.6,'#141830');g.addColorStop(1,'#1a1028');
+  g.addColorStop(0,'#080a14');g.addColorStop(.5,'#0d0f20');g.addColorStop(1,'#060818');
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-  // Silhouette buildings
-  ctx.fillStyle='#0a0818';
-  for(let i=0;i<8;i++){
-    const bx=(i/8)*W;const bh=H*(.2+.3*Math.sin(i*1.3));
-    ctx.fillRect(bx,H-bh,W/9,bh);
+  // Dark buildings
+  ctx.fillStyle='#04050d';
+  for(let i=0;i<10;i++){
+    const bx=(i/10)*W;
+    const bh=H*(.18+.28*Math.sin(i*1.7));
+    ctx.fillRect(bx,H-bh,W/11+2,bh);
   }
-  // Warm window lights at target
+  // Faint distant window light (the warm spot we're looking for)
   if(phase==='playing'){
     const t=SCENES[sceneIdx];
-    ctx.fillStyle='rgba(255,180,80,.6)';
-    ctx.beginPath();ctx.arc(t.targetX*W,t.targetY*H,40,0,Math.PI*2);ctx.fill();
+    const px=W*t.targetX,py=H*t.targetY;
+    ctx.fillStyle='rgba(255,190,80,.15)';
+    ctx.beginPath();ctx.arc(px,py,80,0,Math.PI*2);ctx.fill();
+  }
+  // Thin falling rain lines on fallback
+  ctx.strokeStyle='rgba(120,140,170,.25)';
+  ctx.lineWidth=1;
+  for(let i=0;i<30;i++){
+    const rx=(i*37+Date.now()*0.03)%W;
+    const ry=(i*53+Date.now()*0.12)%H;
+    ctx.beginPath();
+    ctx.moveTo(rx,ry);
+    ctx.lineTo(rx-2,ry+12);
+    ctx.stroke();
   }
 }
 
 function drawEndingBg(){
+  // Bright hopeful sky
   const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#87CEEB');g.addColorStop(.4,'#b0d8ff');g.addColorStop(1,'#e8d8ff');
+  g.addColorStop(0,'#5aa0e8');g.addColorStop(.35,'#90c8f0');g.addColorStop(.7,'#c8d8f0');g.addColorStop(1,'#e8d0b8');
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
   // Rainbow
-  const cx=W/2;const cy=H*0.7;const rs=[H*0.42,H*0.36,H*0.3,H*0.24];
-  const colors=['#ff4455','#ff9944','#ffdd44','#44cc66','#4488ff','#aa44cc'];
-  ctx.lineWidth=H*0.05;ctx.globalAlpha=0.85;
+  const cx=W/2;const cy=H*0.78;
+  const colors=['#ff4455','#ff8844','#ffcc44','#44cc66','#4488dd','#9944cc'];
+  ctx.lineWidth=H*0.045;ctx.globalAlpha=0.9;
   for(let i=0;i<6;i++){
     ctx.strokeStyle=colors[i];
-    ctx.beginPath();ctx.arc(cx,cy,rs[i],Math.PI,2*Math.PI);ctx.stroke();
+    ctx.beginPath();ctx.arc(cx,cy,H*0.42-i*H*0.05,Math.PI,2*Math.PI);ctx.stroke();
   }
   ctx.globalAlpha=1;
-  // Clouds
-  ctx.fillStyle='rgba(255,255,255,.9)';
-  for(let i=0;i<5;i++){
-    const cx2=(i+1)/6*W+Math.sin(Date.now()*.0005+i)*20;
-    const cy2=H*(.12+.1*(i%2));
-    cloud(cx2,cy2,40+i*10);
-  }
   // Sun
-  const sunG=ctx.createRadialGradient(W*0.85,H*0.15,0,W*0.85,H*0.15,80);
-  sunG.addColorStop(0,'#fff5cc');sunG.addColorStop(.5,'#ffd866');sunG.addColorStop(1,'rgba(255,200,80,0)');
-  ctx.fillStyle=sunG;ctx.beginPath();ctx.arc(W*0.85,H*0.15,80,0,Math.PI*2);ctx.fill();
-  ctx.fillStyle='#fff9e0';ctx.beginPath();ctx.arc(W*0.85,H*0.15,28,0,Math.PI*2);ctx.fill();
+  const sunG=ctx.createRadialGradient(W*0.8,H*0.18,0,W*0.8,H*0.18,100);
+  sunG.addColorStop(0,'#fffbe8');sunG.addColorStop(.4,'#ffd866');sunG.addColorStop(1,'rgba(255,200,80,0)');
+  ctx.fillStyle=sunG;ctx.beginPath();ctx.arc(W*0.8,H*0.18,100,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff8dc';ctx.beginPath();ctx.arc(W*0.8,H*0.18,30,0,Math.PI*2);ctx.fill();
+  // Clouds
+  ctx.fillStyle='rgba(255,255,255,.92)';
+  for(let i=0;i<6;i++){
+    const cx2=(i+1)/7*W+Math.sin(Date.now()*.0004+i)*15;
+    const cy2=H*(.1+.08*(i%3));
+    cloud(cx2,cy2,35+i*8);
+  }
 }
 function cloud(x,y,s){
   ctx.beginPath();
-  ctx.arc(x,y,s*0.7,0,Math.PI*2);ctx.arc(x+s*0.5,y-s*0.2,s*0.6,0,Math.PI*2);
-  ctx.arc(x+s,y,s*0.7,0,Math.PI*2);ctx.arc(x+s*0.3,y+s*0.1,s*0.5,0,Math.PI*2);
+  ctx.arc(x,y,s*0.65,0,Math.PI*2);ctx.arc(x+s*0.45,y-s*0.25,s*0.55,0,Math.PI*2);
+  ctx.arc(x+s*0.9,y,s*0.65,0,Math.PI*2);ctx.arc(x+s*0.3,y+s*0.05,s*0.45,0,Math.PI*2);
   ctx.fill();
 }
 function drawStartBg(){
   const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#0a0a1e');g.addColorStop(.5,'#1a1030');g.addColorStop(1,'#200a28');
+  g.addColorStop(0,'#08081a');g.addColorStop(.5,'#120e24');g.addColorStop(1,'#1a0c20');
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // Floating golden sparkles
+  ctx.fillStyle='rgba(232,184,90,.5)';
+  for(let i=0;i<20;i++){
+    const sx=(i*73+Date.now()*0.04)%W;
+    const sy=(i*97+Date.now()*0.08)%H;
+    ctx.beginPath();ctx.arc(sx,sy,1+Math.sin(Date.now()*.003+i)*1,0,Math.PI*2);ctx.fill();
+  }
 }
 
-// ===== Umbrella ring =====
-function drawUmbrella(){
+// ===== Mirror frame drawing (golden ornate frame) =====
+function drawMirror(){
   if(phase!=='playing')return;
-  const cx=umbrellaX,cy=umbrellaY,r=umbrellaRadius;
-  // Outer glow
-  const g=ctx.createRadialGradient(cx,cy,r*.8,cx,cy,r*1.2);
-  g.addColorStop(0,'rgba(255,100,120,.0)');
-  g.addColorStop(.7,'rgba(255,100,120,.25)');
-  g.addColorStop(1,'rgba(255,68,85,0)');
-  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r*1.25,0,Math.PI*2);ctx.fill();
-  // Red ring (umbrella canopy edge)
+  const cx=mirrorX,cy=mirrorY,r=mirrorRadius;
+  const t=Date.now()*0.002;
+
+  // Outer magic glow
+  const glow=ctx.createRadialGradient(cx,cy,r*0.95,cx,cy,r*1.45);
+  glow.addColorStop(0,'rgba(232,184,90,0)');
+  glow.addColorStop(.6,'rgba(232,184,90,.28)');
+  glow.addColorStop(1,'rgba(232,184,90,0)');
+  ctx.fillStyle=glow;ctx.beginPath();ctx.arc(cx,cy,r*1.5,0,Math.PI*2);ctx.fill();
+
+  // Mirror reflection edge (inner highlight — glass reflection)
+  ctx.save();
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);ctx.clip();
+  const reflGrad=ctx.createLinearGradient(cx-r,cy-r,cx+r,cy+r);
+  reflGrad.addColorStop(0,'rgba(255,255,255,.12)');
+  reflGrad.addColorStop(0.35,'rgba(255,255,255,.03)');
+  reflGrad.addColorStop(0.55,'rgba(255,255,255,0)');
+  reflGrad.addColorStop(1,'rgba(0,0,0,.15)');
+  ctx.fillStyle=reflGrad;ctx.fillRect(cx-r,cy-r,r*2,r*2);
+  ctx.restore();
+
+  // Golden frame rim (outer thick)
   ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
-  ctx.strokeStyle='rgba(220,40,50,.9)';ctx.lineWidth=7;ctx.stroke();
-  // Inner subtle glow ring
-  ctx.beginPath();ctx.arc(cx,cy,r-4,0,Math.PI*2);
-  ctx.strokeStyle='rgba(255,120,130,.35)';ctx.lineWidth=3;ctx.stroke();
-  // Umbrella ribs (subtle)
-  ctx.strokeStyle='rgba(200,30,40,.25)';ctx.lineWidth=1.5;
-  for(let i=0;i<6;i++){
-    const a=(i/6)*Math.PI*2-Math.PI/2;
+  ctx.strokeStyle='#c89030';ctx.lineWidth=8;ctx.stroke();
+  // Golden highlight stroke (inner thinner)
+  ctx.beginPath();ctx.arc(cx,cy,r-5,0,Math.PI*2);
+  ctx.strokeStyle='#e8b85a';ctx.lineWidth=3;ctx.stroke();
+  // Dark inner shadow stroke
+  ctx.beginPath();ctx.arc(cx,cy,r+5,0,Math.PI*2);
+  ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=2;ctx.stroke();
+
+  // Ornate frame segments — 8 golden knobs around the mirror
+  for(let i=0;i<8;i++){
+    const a=(i/8)*Math.PI*2+t*0.1;
+    const kx=cx+Math.cos(a)*(r+6);
+    const ky=cy+Math.sin(a)*(r+6);
+    ctx.fillStyle='#d4a040';
+    ctx.beginPath();ctx.arc(kx,ky,4,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff0c0';
+    ctx.beginPath();ctx.arc(kx-1,ky-1,1.5,0,Math.PI*2);ctx.fill();
+  }
+
+  // Top crown ornament
+  const crownX=cx, crownY=cy-r-10;
+  ctx.fillStyle='#c89030';
+  ctx.beginPath();
+  ctx.arc(crownX,crownY,5,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#e8b85a';
+  ctx.beginPath();
+  ctx.moveTo(crownX-6,crownY);ctx.lineTo(crownX,crownY-10);ctx.lineTo(crownX+6,crownY);
+  ctx.closePath();ctx.fill();
+}
+
+// ===== Rain (gloom side only — after clip layers) =====
+function drawRain(){
+  ctx.save();
+  // Clip rain to OUTSIDE the mirror
+  ctx.beginPath();
+  ctx.rect(0,0,W,H);
+  if(phase==='playing'){
+    ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2,true);
+  }
+  ctx.clip();
+  ctx.strokeStyle='rgba(140,160,200,.5)';
+  ctx.lineWidth=1.2;ctx.lineCap='round';
+  for(const r of raindrops){
+    ctx.globalAlpha=r.op;
     ctx.beginPath();
-    ctx.moveTo(cx+Math.cos(a)*r*0.1,cy+Math.sin(a)*r*0.1);
-    ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+    ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.vx*2,r.y+r.len);
     ctx.stroke();
   }
-  // Top knot
-  ctx.fillStyle='#cc2233';
-  ctx.beginPath();ctx.arc(cx,cy-r+3,5,0,Math.PI*2);ctx.fill();
+  ctx.globalAlpha=1;
+  ctx.restore();
 }
 
-// ===== Rain tint overlay for whole canvas =====
-function drawRainOverlay(){
+// ===== Sparkles (inside mirror only) =====
+function drawSparkles(){
+  for(const p of particles){
+    ctx.fillStyle=`hsla(${p.hue},90%,75%,${p.life*.85})`;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+  }
+}
+
+// ===== Full canvas cool tint =====
+function drawGlobalTint(){
   if(phase==='playing'){
-    // Global cool-blue tint
-    ctx.fillStyle='rgba(20,25,50,.12)';
+    ctx.fillStyle='rgba(15,18,35,.08)';
     ctx.fillRect(0,0,W,H);
   }
 }
 
 // ===== Main loop =====
 function draw(){
-  // Background layers
   if(phase==='end'){
     drawEndingBg();
   }else if(phase==='start'){
     drawStartBg();
   }else{
-    // Transition fade
     let alpha=0;
-    if(sceneTransition){sceneTransitionT+=.04;alpha=sceneTransitionT;if(sceneTransitionT>1)alpha=1;}
+    if(sceneTransition){sceneTransitionT+=.035;alpha=Math.min(sceneTransitionT,1);}
     ctx.save();
     ctx.globalAlpha=1-alpha;
-    drawSceneOutside(1);
-    drawSceneInside();
+    // OUTSIDE: heavy gloom
+    drawBgOutside();
+    // INSIDE: vibrant beauty
+    drawBgInside();
+    // Rain on gloom side only
     drawRain();
     ctx.restore();
-    // Fade black overlay during transition
-    if(alpha>0){ctx.fillStyle='rgba(10,10,25,'+alpha+')';ctx.fillRect(0,0,W,H);}
+    // Fade to black during transition
+    if(alpha>0){ctx.fillStyle='rgba(8,8,16,'+alpha+')';ctx.fillRect(0,0,W,H);}
   }
-  // Foreground
   if(phase==='playing'){
-    drawGlow();
-    drawUmbrella();
-    drawRainOverlay();
+    drawSparkles();
+    drawMirror();
+    drawGlobalTint();
     updateRain();
-    updateGlow();
+    updateSparkle();
   }
   requestAnimationFrame(draw);
 }
 
 // ===== Load images =====
 (async()=>{
+  // Try multiple paths — some servers need './' prefix, some don't
   await Promise.all([
-    loadImage('street','./scenes/scene-street.jpg'),
-    loadImage('bus','./scenes/scene-bus-stop.jpg'),
-    loadImage('park','./scenes/scene-park-bench.jpg'),
-    loadImage('ending','./scenes/scene-ending.jpg'),
+    tryLoad('street','./scenes/scene-street.jpg','/scenes/scene-street.jpg'),
+    tryLoad('bus','./scenes/scene-bus-stop.jpg','/scenes/scene-bus-stop.jpg'),
+    tryLoad('park','./scenes/scene-park-bench.jpg','/scenes/scene-park-bench.jpg'),
+    tryLoad('ending','./scenes/scene-ending.jpg','/scenes/scene-ending.jpg'),
   ]);
   resize();
   draw();
 })();
+
+async function tryLoad(key,...urls){
+  for(const url of urls){
+    const res=await loadImage(key,url);
+    if(res)return res;
+  }
+  return null;
+}
 
 // Init
 resize();
