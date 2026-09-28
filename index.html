@@ -134,7 +134,7 @@ function resize(){
   cv.width=W*DPR;cv.height=H*DPR;
   cv.style.width=W+'px';cv.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  mirrorRadius=Math.min(W,H)*0.30;
+  mirrorRadius=Math.min(W,H)*0.38;
   if(phase==='playing'){
     if(mirrorX===undefined){mirrorX=W/2;mirrorY=H*0.55;}
   }
@@ -323,20 +323,24 @@ function drawBgInside(){
 function drawSceneImage(which){
   if(phase==='end'){drawEndingBg();return;}
   if(phase==='start'){drawStartBg();return;}
-  // which='dark' → use the gray gloom image (outside mirror)
-  // which='warm' → use the vibrant beauty image (inside mirror)
   const s=SCENES[sceneIdx];
   const key=which==='dark'?s.darkId:s.warmId;
   const img=IMAGES[key];
   if(img && img.complete && img.naturalWidth>0){
+    // CONTAIN mode: draw the ENTIRE image fully visible, no cropping ever
+    // This is the "wide view" — user can see full scene + full characters
     const ar=img.naturalWidth/img.naturalHeight;
     const cr=W/H;
-    let sx,sy,sw,sh;
-    if(ar>cr){sh=img.naturalHeight;sw=sh*cr;sx=(img.naturalWidth-sw)/2;sy=0;}
-    else{sw=img.naturalWidth;sy=(img.naturalHeight-sw/cr)/2;sh=sw/cr;sx=0;}
-    ctx.drawImage(img,sx,sy,sw,sh,0,0,W,H);
+    let dx=0,dy=0,dw=W,dh=H; // default fill
+    if(ar>cr){
+      // image wider than canvas → fit width, letterbox top/bottom
+      dw=W; dh=W/ar; dy=(H-dh)/2;
+    }else{
+      // image taller than canvas → fit height, letterbox left/right
+      dh=H; dw=H*ar; dx=(W-dw)/2;
+    }
+    ctx.drawImage(img,dx,dy,dw,dh);
   }else{
-    // Fallback procedural — guaranteed to show something
     drawProceduralFallback();
   }
 }
