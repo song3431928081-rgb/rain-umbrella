@@ -258,64 +258,83 @@ function updateRain(){
 // ===== Sparkle particles (ONLY inside mirror — magic glow) =====
 function spawnSparkle(){
   if(phase!=='playing')return;
-  particles.push({
-    x:mirrorX+(Math.random()-.5)*mirrorRadius*0.6,
-    y:mirrorY+(Math.random()-.5)*mirrorRadius*0.6,
-    vx:(Math.random()-.5)*0.3,
-    vy:-0.8-Math.random()*1.2,
-    life:1,
-    size:1.5+Math.random()*2.5,
-    hue:40+Math.random()*20
-  });
+  // Spawn 2 at a time for denser magic effect
+  for(let k=0;k<2;k++){
+    particles.push({
+      x:mirrorX+(Math.random()-.5)*mirrorRadius*0.7,
+      y:mirrorY+(Math.random()-.5)*mirrorRadius*0.7,
+      vx:(Math.random()-.5)*0.4,
+      vy:-1-Math.random()*1.5,
+      life:1,
+      size:1.5+Math.random()*3,
+      hue:35+Math.random()*25
+    });
+  }
 }
 function updateSparkle(){
   for(let i=particles.length-1;i>=0;i--){
     const p=particles[i];
-    p.x+=p.vx;p.y+=p.vy;p.life-=.02;
+    p.x+=p.vx;p.y+=p.vy;p.life-=.018;
     if(p.life<=0)particles.splice(i,1);
   }
-  if(Math.random()<.5)spawnSparkle();
+  if(Math.random()<.75)spawnSparkle();
 }
 
 // ===== Background rendering =====
 function drawBgOutside(){
-  // Draw scene with HEAVY gloom filter — grayscale, dark, desaturated, slightly blurred
+  // Draw scene with EXTREME gloom — near-black, fully desaturated, heavy fog blur
   ctx.save();
   ctx.beginPath();
   ctx.rect(0,0,W,H);
   if(phase==='playing'){
     ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2,true); // inverted clip
   }
-  // HEAVY gloom filter for contrast
-  ctx.filter='grayscale(0.95) saturate(0.05) brightness(0.28) contrast(0.7) blur(1.2px)';
+  // EXTREME gloom: crush to near-dark, kill all color, blur like fog
+  ctx.filter='grayscale(1) saturate(0) brightness(0.12) contrast(0.9) blur(3px)';
   drawSceneImage();
   ctx.filter='none';
-  // Cold tint overlay — makes outside feel miserable
-  ctx.fillStyle='rgba(10,15,30,.55)';ctx.fillRect(0,0,W,H);
-  // Subtle vignette darkness
-  const vig=ctx.createRadialGradient(W/2,H/2,W*0.2,W/2,H/2,Math.max(W,H)*0.7);
+  // Heavy cold-blue tint — makes outside feel cold and dead
+  ctx.fillStyle='rgba(8,12,28,.7)';ctx.fillRect(0,0,W,H);
+  // Drifting fog layers
+  const fogT=Date.now()*0.00015;
+  for(let i=0;i<3;i++){
+    const fy=H*(0.3+i*0.25)+Math.sin(fogT+i)*30;
+    const fg=ctx.createRadialGradient(W*(0.2+0.3*i)+Math.sin(fogT*2+i)*100,fy,0,W*(0.2+0.3*i),fy,W*0.4);
+    fg.addColorStop(0,'rgba(40,50,70,.18)');
+    fg.addColorStop(1,'rgba(40,50,70,0)');
+    ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);
+  }
+  // Strong vignette — corners feel oppressive
+  const vig=ctx.createRadialGradient(W/2,H/2,W*0.15,W/2,H/2,Math.max(W,H)*0.75);
   vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(1,'rgba(0,0,0,.35)');
+  vig.addColorStop(0.6,'rgba(0,0,0,.25)');
+  vig.addColorStop(1,'rgba(0,0,0,.6)');
   ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
   ctx.restore();
 }
 
 function drawBgInside(){
-  // Draw scene with WARM VIBRANT filter — the mirror reflects beauty
+  // Draw scene with RADIANT warmth — full color, bright, alive
   ctx.save();
   ctx.beginPath();
   ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2);
   ctx.clip();
-  // Vibrant warm filter
-  ctx.filter='grayscale(0) saturate(1.4) brightness(1.15) contrast(1.1)';
+  // VIBRANT: max saturation, boosted brightness, crisp contrast
+  ctx.filter='grayscale(0) saturate(1.8) brightness(1.35) contrast(1.15)';
   drawSceneImage();
   ctx.filter='none';
-  // Warm golden glow overlay — like firelight
+  // Warm firelight glow — center is golden, edges fade to amber
   const glow=ctx.createRadialGradient(mirrorX,mirrorY,0,mirrorX,mirrorY,mirrorRadius);
-  glow.addColorStop(0,'rgba(255,220,140,.4)');
-  glow.addColorStop(0.6,'rgba(255,180,90,.2)');
-  glow.addColorStop(1,'rgba(255,120,60,0)');
+  glow.addColorStop(0,'rgba(255,225,150,.5)');
+  glow.addColorStop(0.5,'rgba(255,190,100,.3)');
+  glow.addColorStop(1,'rgba(255,140,60,.1)');
   ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+  // Sharpen the edge — bright rim of light at mirror boundary
+  const rim=ctx.createRadialGradient(mirrorX,mirrorY,mirrorRadius*0.85,mirrorX,mirrorY,mirrorRadius);
+  rim.addColorStop(0,'rgba(255,240,200,0)');
+  rim.addColorStop(0.9,'rgba(255,240,180,.15)');
+  rim.addColorStop(1,'rgba(255,220,140,.4)');
+  ctx.fillStyle=rim;ctx.fillRect(0,0,W,H);
   ctx.restore();
 }
 
@@ -338,33 +357,33 @@ function drawSceneImage(){
 }
 
 function drawProceduralFallback(){
-  // Dark city silhouette fallback
+  // Dark city silhouette fallback — oppressive night
   const g=ctx.createLinearGradient(0,0,0,H);
-  g.addColorStop(0,'#080a14');g.addColorStop(.5,'#0d0f20');g.addColorStop(1,'#060818');
+  g.addColorStop(0,'#040610');g.addColorStop(.5,'#080a18');g.addColorStop(1,'#020308');
   ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
-  // Dark buildings
-  ctx.fillStyle='#04050d';
-  for(let i=0;i<10;i++){
-    const bx=(i/10)*W;
-    const bh=H*(.18+.28*Math.sin(i*1.7));
-    ctx.fillRect(bx,H-bh,W/11+2,bh);
+  // Dark buildings — barely visible silhouettes
+  ctx.fillStyle='#02030a';
+  for(let i=0;i<12;i++){
+    const bx=(i/12)*W;
+    const bh=H*(.15+.32*Math.sin(i*1.7));
+    ctx.fillRect(bx,H-bh,W/13+2,bh);
   }
   // Faint distant window light (the warm spot we're looking for)
   if(phase==='playing'){
     const t=SCENES[sceneIdx];
     const px=W*t.targetX,py=H*t.targetY;
-    ctx.fillStyle='rgba(255,190,80,.15)';
-    ctx.beginPath();ctx.arc(px,py,80,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='rgba(255,190,80,.12)';
+    ctx.beginPath();ctx.arc(px,py,60,0,Math.PI*2);ctx.fill();
   }
   // Thin falling rain lines on fallback
-  ctx.strokeStyle='rgba(120,140,170,.25)';
+  ctx.strokeStyle='rgba(90,110,150,.2)';
   ctx.lineWidth=1;
-  for(let i=0;i<30;i++){
+  for(let i=0;i<40;i++){
     const rx=(i*37+Date.now()*0.03)%W;
     const ry=(i*53+Date.now()*0.12)%H;
     ctx.beginPath();
     ctx.moveTo(rx,ry);
-    ctx.lineTo(rx-2,ry+12);
+    ctx.lineTo(rx-2,ry+14);
     ctx.stroke();
   }
 }
