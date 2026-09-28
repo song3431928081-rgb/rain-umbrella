@@ -134,7 +134,7 @@ function resize(){
   cv.width=W*DPR;cv.height=H*DPR;
   cv.style.width=W+'px';cv.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  mirrorRadius=Math.min(W,H)*0.38;
+  mirrorRadius=Math.min(W,H)*0.48;
   if(phase==='playing'){
     if(mirrorX===undefined){mirrorX=W/2;mirrorY=H*0.55;}
   }
