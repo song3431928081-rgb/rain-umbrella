@@ -283,24 +283,17 @@ function updateSparkle(){
 
 // ===== Background rendering =====
 function drawBgOutside(){
-  // Draw scene with light desaturation — clearly visible but cool-toned
+  // Draw the dark image with minimal filter — the image is already gloomy by design
   ctx.save();
   ctx.beginPath();
   ctx.rect(0,0,W,H);
   if(phase==='playing'){
     ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2,true); // inverted clip
   }
-  // Light desaturation, keep brightness high so every detail is clearly visible
-  ctx.filter='grayscale(0.35) saturate(0.45) brightness(0.85) contrast(0.9)';
+  // Very light desaturation — just enough to feel less colorful than mirror inside
+  ctx.filter='grayscale(0.25) saturate(0.7)';
   drawSceneImage('dark');
   ctx.filter='none';
-  // Very faint cool tint — just a hint of loneliness, barely noticeable
-  ctx.fillStyle='rgba(20,25,45,.15)';ctx.fillRect(0,0,W,H);
-  // Minimal vignette
-  const vig=ctx.createRadialGradient(W/2,H/2,W*0.25,W/2,H/2,Math.max(W,H)*0.7);
-  vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(1,'rgba(0,0,0,.12)');
-  ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
   ctx.restore();
 }
 
