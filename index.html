@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>雨中看 · 敞开的红伞</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;user-select:none}
+html,body{width:100%;height:100%;overflow:hidden;background:#1a1a2e;font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+#cv{display:block;width:100%;height:100%;touch-action:none;background:#2a2a3e}
+
+/* Start overlay */
+#start{position:fixed;inset:0;background:rgba(10,10,25,.85);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;transition:opacity .5s}
+#start.hidden{opacity:0;pointer-events:none}
+#start h1{font-size:32px;color:#ff4455;margin-bottom:12px;font-weight:800;letter-spacing:2px;text-shadow:0 0 20px rgba(255,68,85,.5)}
+#start .sub{font-size:15px;color:#c0c0d0;margin-bottom:30px;line-height:1.6;text-align:center;padding:0 20px}
+#start .hint{font-size:13px;color:#888;margin-top:20px}
+.btn{background:linear-gradient(135deg,#ff4455,#cc3344);color:#fff;border:none;padding:14px 36px;font-size:16px;font-weight:700;border-radius:28px;cursor:pointer;box-shadow:0 4px 20px rgba(255,68,85,.4);transition:transform .15s,box-shadow .15s}
+.btn:active{transform:scale(.95)}
+
+/* Bottom quote */
+#quote{position:fixed;bottom:max(70px,env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:rgba(255,255,255,.8);font-size:13px;padding:0 20px;line-height:1.5;pointer-events:none;z-index:10;font-style:italic;transition:opacity .4s}
+
+/* Next Scene button */
+#next-btn{position:fixed;top:max(20px,env(safe-area-inset-top));right:20px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);color:#fff;border:1px solid rgba(255,255,255,.3);padding:10px 22px;font-size:14px;border-radius:22px;cursor:pointer;z-index:20;transition:opacity .4s}
+#next-btn.hidden{opacity:0;pointer-events:none}
+#next-btn:active{background:rgba(255,255,255,.25)}
+
+/* Scene counter */
+#scene-count{position:fixed;top:max(22px,env(safe-area-inset-top));left:20px;color:rgba(255,255,255,.7);font-size:14px;z-index:20;background:rgba(0,0,0,.3);padding:6px 14px;border-radius:16px}
+
+/* End overlay */
+#end{position:fixed;inset:0;background:rgba(10,10,25,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;opacity:0;pointer-events:none;transition:opacity .8s}
+#end.show{opacity:1;pointer-events:auto}
+#end h2{font-size:34px;color:#ffcc00;margin-bottom:12px;font-weight:800;text-shadow:0 0 20px rgba(255,204,0,.5)}
+#end .end-sub{font-size:16px;color:#d0d0e0;margin-bottom:30px}
+#end .final-quote{font-size:14px;color:#b0b0c0;font-style:italic;margin-bottom:28px;padding:0 30px;text-align:center;line-height:1.7;max-width:360px}
+
+/* Umbrella indicator (visual hint that umbrella exists) */
+#umbrella-hint{position:fixed;bottom:max(30px,env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:12px;z-index:10;pointer-events:none;text-align:center;transition:opacity .4s}
+#umbrella-hint.hidden{opacity:0}
+</style>
+</head>
+<body>
+
+<canvas id="cv"></canvas>
+
+<!-- Start screen -->
+<div id="start">
+  <h1>雨 中 看</h1>
+  <div class="sub">敞开的红伞<br>左右滑动，移动看不见的伞<br>在大雨里，找到温暖的角落</div>
+  <button class="btn" id="start-btn">开 始</button>
+  <div class="hint">☔ 把手指按在屏幕上左右滑 ｜ Discover 3 warm spots</div>
+</div>
+
+<!-- End screen -->
+<div id="end">
+  <h2>The Rain Has Stopped</h2>
+  <div class="end-sub">We found our warmth in the cold.</div>
+  <div class="final-quote">"我们不能阻止暴雨，但我们可以成为彼此的屋檐。<br>We can't stop the rainstorm, but we can become the eaves of each other."</div>
+  <button class="btn" id="restart-btn">再 来 一 次</button>
+</div>
+
+<!-- HUD -->
+<div id="scene-count">1 / 3</div>
+<button id="next-btn">Next →</button>
+<div id="quote">我们不能阻止暴雨，但我们可以成为彼此的屋檐</div>
+<div id="umbrella-hint">← 滑动移动红伞 →</div>
+
+<script>
+(()=>{
+'use strict';
+
+const cv=document.getElementById('cv');
+const ctx=cv.getContext('2d');
+let W,H,DPR;
+
+// ===== Scenes =====
+const SCENES=[
+  {id:'street',  title:'雨中的老巷子',   quote:'雨夜里，那盏还亮着的灯笼，是在等谁呢。',   targetX:0.68, targetY:0.55},
+  {id:'bus',     title:'末班车的站台',   quote:'一起挨过这场雨的人，记得要握紧手。',     targetX:0.55, targetY:0.55},
+  {id:'park',    title:'长凳上的黄昏',   quote:'一把伞，两个人，就够撑住整个夜晚。',     targetX:0.62, targetY:0.55},
+];
+const ENDING={id:'ending',title:'雨停了',quote:'我们不能阻止暴雨，但我们可以成为彼此的屋檐。'};
+
+// ===== State =====
+let phase='start'; // start | playing | end
+let sceneIdx=0;
+let umbrellaX, umbrellaY, targetX, targetY;
+let umbrellaRadius;
+let raindrops=[];
+let particles=[]; // umbrella glow particles
+let foundCount=0;  // warm spots found in current scene
+let totalFound=0;
+let sceneTransition=false;
+let sceneTransitionT=0; // 0→1
+
+// ===== Audio =====
+let audioCtx=null;
+function ensureAudio(){
+  if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
+}
+function tone(freq,dur,type='sine',vol=.15,delay=0){
+  if(!audioCtx)return;
+  setTimeout(()=>{
+    const o=audioCtx.createOscillator();const g=audioCtx.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(0,audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(vol,audioCtx.currentTime+.02);
+    g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);
+    o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);
+  },delay);
+}
+function sndRain(){tone(1200+Math.random()*400,.08,'white',.02)}
+function sndSpotFound(){
+  tone(660,.12,'sine',.12,0);tone(880,.15,'sine',.12,.10);tone(1320,.2,'sine',.12,.22);
+}
+function sndNextScene(){tone(440,.15,'triangle',.1,0);tone(550,.15,'triangle',.1,.12);}
+
+// ===== Image loading =====
+const IMAGES={};
+function loadImage(key,url){
+  return new Promise(res=>{
+    const img=new Image();
+    img.crossOrigin='anonymous';
+    img.onload=()=>{IMAGES[key]=img;res(img);};
+    img.onerror=()=>{IMAGES[key]=null;res(null);};
+    img.src=url;
+  });
+}
+
+// ===== Resize =====
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=window.innerWidth;H=window.innerHeight;
+  cv.width=W*DPR;cv.height=H*DPR;
+  cv.style.width=W+'px';cv.style.height=H+'px';
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  umbrellaRadius=Math.min(W,H)*0.22;
+  if(phase==='playing'){
+    targetX=W*SCENES[sceneIdx].targetX;targetY=H*SCENES[sceneIdx].targetY;
+    // smooth umbrella position toward target
+    if(umbrellaX===undefined){umbrellaX=W/2;umbrellaY=H/2;}
+  }
+}
+window.addEventListener('resize',resize);
+
+// ===== Input =====
+let dragging=false, dragId=null, lastX=0;
+cv.addEventListener('touchstart',onDown,{passive:false});
+cv.addEventListener('touchmove',onMove,{passive:false});
+cv.addEventListener('touchend',onUp);
+cv.addEventListener('mousedown',onDown);
+window.addEventListener('mousemove',onMove);
+window.addEventListener('mouseup',onUp);
+function onDown(e){
+  e.preventDefault();ensureAudio();
+  if(phase!=='playing')return;
+  dragging=true; dragId=e.touches?e.touches[0].identifier:'mouse';
+  const p=e.touches?e.touches[0]:e;
+  lastX=umbrellaX=p.clientX; umbrellaY=p.clientY;
+}
+function onMove(e){
+  if(!dragging||phase!=='playing')return;
+  if(e.touches){
+    let t=null;for(const touch of e.touches)if(touch.identifier===dragId){t=touch;break;}
+    if(!t)return; e.preventDefault();
+    umbrellaX=t.clientX; umbrellaY=t.clientY;
+  }else{
+    umbrellaX=e.clientX; umbrellaY=e.clientY;
+  }
+  // Clamp within canvas
+  umbrellaX=Math.max(umbrellaRadius,Math.min(W-umbrellaRadius,umbrellaX));
+  umbrellaY=Math.max(umbrellaRadius*0.8,Math.min(H-umbrellaRadius*0.8,umbrellaY));
+  // Check if umbrella covers warm spot
+  const d=Math.hypot(umbrellaX-targetX,umbrellaY-targetY);
+  if(d<umbrellaRadius*0.5 && !SCENES[sceneIdx].found){
+    SCENES[sceneIdx].found=true; foundCount++; totalFound++;
+    document.getElementById('next-btn').classList.remove('hidden');
+    sndSpotFound();
+    updateQuote();
+  }
+}
+function onUp(e){
+  dragging=false; dragId=null;
+}
+
+// ===== Scene management =====
+function startGame(){
+  ensureAudio();
+  phase='playing';sceneIdx=0;foundCount=0;totalFound=0;
+  SCENES.forEach(s=>s.found=false);
+  resize();
+  document.getElementById('start').classList.add('hidden');
+  document.getElementById('next-btn').classList.add('hidden');
+  document.getElementById('scene-count').textContent='1 / '+SCENES.length;
+  document.getElementById('umbrella-hint').classList.remove('hidden');
+  document.getElementById('quote').textContent=SCENES[0].quote;
+  updateQuote();
+  setTimeout(()=>document.getElementById('umbrella-hint').classList.add('hidden'),2500);
+}
+function nextScene(){
+  if(!SCENES[sceneIdx].found)return;
+  sndNextScene();
+  sceneTransition=true;sceneTransitionT=0;
+  setTimeout(()=>{
+    sceneIdx++;
+    if(sceneIdx>=SCENES.length){
+      // Ending
+      phase='end';
+      document.getElementById('end').classList.add('show');
+      document.getElementById('next-btn').classList.add('hidden');
+      document.getElementById('quote').textContent=ENDING.quote;
+      return;
+    }
+    foundCount=0;
+    targetX=W*SCENES[sceneIdx].targetX; targetY=H*SCENES[sceneIdx].targetY;
+    document.getElementById('scene-count').textContent=(sceneIdx+1)+' / '+SCENES.length;
+    document.getElementById('next-btn').classList.add('hidden');
+    document.getElementById('umbrella-hint').classList.remove('hidden');
+    document.getElementById('quote').textContent=SCENES[sceneIdx].quote;
+    setTimeout(()=>document.getElementById('umbrella-hint').classList.add('hidden'),2500);
+    sceneTransition=false;
+  },500);
+}
+function updateQuote(){
+  const q=document.getElementById('quote');
+  q.style.opacity='0';
+  setTimeout(()=>{q.textContent=SCENES[sceneIdx].quote;q.style.opacity='.8';},300);
+}
+function restart(){
+  document.getElementById('end').classList.remove('show');
+  startGame();
+}
+document.getElementById('start-btn').addEventListener('click',startGame);
+document.getElementById('restart-btn').addEventListener('click',restart);
+document.getElementById('next-btn').addEventListener('click',nextScene);
+
+// ===== Rain particles =====
+function spawnRain(){
+  for(let i=0;i<3;i++){
+    raindrops.push({
+      x:Math.random()*W,
+      y:-10,
+      vy:8+Math.random()*8,
+      vx:-1.5-Math.random()*2,
+      len:10+Math.random()*14,
+      op:.4+Math.random()*.5
+    });
+  }
+}
+function updateRain(){
+  for(let i=raindrops.length-1;i>=0;i--){
+    const r=raindrops[i];
+    r.x+=r.vx;r.y+=r.vy;
+    if(r.y>H+20){raindrops.splice(i,1);continue;}
+    // Remove raindrops that fall INTO umbrella circle (creates "dry spot" effect)
+    if(phase==='playing'){
+      const d=Math.hypot(r.x-umbrellaX,r.y-umbrellaY);
+      if(d<umbrellaRadius*0.9)raindrops.splice(i,1);
+    }
+  }
+  if(Math.random()<0.9)spawnRain();
+}
+function drawRain(){
+  ctx.strokeStyle='rgba(180,200,230,0.6)';
+  ctx.lineWidth=1.2;
+  ctx.lineCap='round';
+  ctx.beginPath();
+  for(const r of raindrops){
+    ctx.globalAlpha=r.op;
+    ctx.moveTo(r.x,r.y);ctx.lineTo(r.x+r.vx*2,r.y+r.len);
+  }
+  ctx.stroke();ctx.globalAlpha=1;
+}
+
+// ===== Umbrella glow particles =====
+function spawnGlow(){
+  if(phase!=='playing')return;
+  particles.push({
+    x:umbrellaX+(Math.random()-.5)*umbrellaRadius*0.5,
+    y:umbrellaY+(Math.random()-.5)*umbrellaRadius*0.5,
+    vx:(Math.random()-.5)*0.5,
+    vy:-1-Math.random()*1.5,
+    life:1,
+    size:2+Math.random()*3
+  });
+}
+function updateGlow(){
+  for(let i=particles.length-1;i>=0;i--){
+    const p=particles[i];
+    p.x+=p.vx;p.y+=p.vy;p.life-=.02;
+    if(p.life<=0)particles.splice(i,1);
+  }
+  if(Math.random()<.4)spawnGlow();
+}
+function drawGlow(){
+  for(const p of particles){
+    ctx.fillStyle=`rgba(255,220,150,${p.life*.8})`;
+    ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();
+  }
+}
+
+// ===== Scene rendering =====
+function drawSceneOutside(phase01){
+  // Draw rainy-gray filtered scene OUTSIDE umbrella circle
+  const blur=(1.5+phase01*0);
+  const sat=0.15;
+  const grayscale=0.45;
+  const bright=0.55;
+  const contr=0.85;
+
+  ctx.save();
+  // Clip to everything EXCEPT umbrella circle (inverted clip)
+  ctx.beginPath();
+  ctx.rect(0,0,W,H);
+  if(phase==='playing'){
+    ctx.arc(umbrellaX,umbrellaY,umbrellaRadius,0,Math.PI*2,true);
+  }
+  ctx.clip();
+
+  // Apply rainy filter
+  ctx.filter=`grayscale(${grayscale}) saturate(${sat}) brightness(${bright}) contrast(${contr}) blur(${blur}px)`;
+  drawBackgroundImage();
+  ctx.filter='none';
+  // Add rain tint overlay
+  ctx.fillStyle='rgba(30,45,80,.35)';ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}
+
+function drawSceneInside(){
+  // Draw warm-colorful scene INSIDE umbrella circle
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(umbrellaX,umbrellaY,umbrellaRadius,0,Math.PI*2);
+  ctx.clip();
+  ctx.filter='none'; // warm, no filter
+  drawBackgroundImage();
+  // Add warm glow overlay
+  const glow=ctx.createRadialGradient(umbrellaX,umbrellaY,0,umbrellaX,umbrellaY,umbrellaRadius);
+  glow.addColorStop(0,'rgba(255,200,100,.35)');
+  glow.addColorStop(0.7,'rgba(255,160,60,.15)');
+  glow.addColorStop(1,'rgba(255,100,50,0)');
+  ctx.fillStyle=glow;ctx.fillRect(0,0,W,H);
+  ctx.restore();
+}
+
+function drawBackgroundImage(){
+  if(phase==='end'){
+    drawEndingBg();return;
+  }
+  if(phase==='start'){
+    drawStartBg();return;
+  }
+  const key=SCENES[sceneIdx].id;
+  const img=IMAGES[key];
+  if(img && img.complete && img.naturalWidth){
+    // Cover-fit
+    const ar=img.naturalWidth/img.naturalHeight;
+    const cr=W/H;
+    let sx,sy,sw,sh;
+    if(ar>cr){sh=img.naturalHeight;sw=sh*cr;sx=(img.naturalWidth-sw)/2;sy=0;}
+    else{sw=img.naturalWidth;sy=(img.naturalHeight-sw/cr)/2;sh=sw/cr;sx=0;}
+    ctx.drawImage(img,sx,sy,sw,sh,0,0,W,H);
+  }else{
+    drawProceduralBg();
+  }
+}
+
+function drawProceduralBg(){
+  // Fallback: animated night scene
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0a1025');g.addColorStop(.6,'#141830');g.addColorStop(1,'#1a1028');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // Silhouette buildings
+  ctx.fillStyle='#0a0818';
+  for(let i=0;i<8;i++){
+    const bx=(i/8)*W;const bh=H*(.2+.3*Math.sin(i*1.3));
+    ctx.fillRect(bx,H-bh,W/9,bh);
+  }
+  // Warm window lights at target
+  if(phase==='playing'){
+    const t=SCENES[sceneIdx];
+    ctx.fillStyle='rgba(255,180,80,.6)';
+    ctx.beginPath();ctx.arc(t.targetX*W,t.targetY*H,40,0,Math.PI*2);ctx.fill();
+  }
+}
+
+function drawEndingBg(){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#87CEEB');g.addColorStop(.4,'#b0d8ff');g.addColorStop(1,'#e8d8ff');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+  // Rainbow
+  const cx=W/2;const cy=H*0.7;const rs=[H*0.42,H*0.36,H*0.3,H*0.24];
+  const colors=['#ff4455','#ff9944','#ffdd44','#44cc66','#4488ff','#aa44cc'];
+  ctx.lineWidth=H*0.05;ctx.globalAlpha=0.85;
+  for(let i=0;i<6;i++){
+    ctx.strokeStyle=colors[i];
+    ctx.beginPath();ctx.arc(cx,cy,rs[i],Math.PI,2*Math.PI);ctx.stroke();
+  }
+  ctx.globalAlpha=1;
+  // Clouds
+  ctx.fillStyle='rgba(255,255,255,.9)';
+  for(let i=0;i<5;i++){
+    const cx2=(i+1)/6*W+Math.sin(Date.now()*.0005+i)*20;
+    const cy2=H*(.12+.1*(i%2));
+    cloud(cx2,cy2,40+i*10);
+  }
+  // Sun
+  const sunG=ctx.createRadialGradient(W*0.85,H*0.15,0,W*0.85,H*0.15,80);
+  sunG.addColorStop(0,'#fff5cc');sunG.addColorStop(.5,'#ffd866');sunG.addColorStop(1,'rgba(255,200,80,0)');
+  ctx.fillStyle=sunG;ctx.beginPath();ctx.arc(W*0.85,H*0.15,80,0,Math.PI*2);ctx.fill();
+  ctx.fillStyle='#fff9e0';ctx.beginPath();ctx.arc(W*0.85,H*0.15,28,0,Math.PI*2);ctx.fill();
+}
+function cloud(x,y,s){
+  ctx.beginPath();
+  ctx.arc(x,y,s*0.7,0,Math.PI*2);ctx.arc(x+s*0.5,y-s*0.2,s*0.6,0,Math.PI*2);
+  ctx.arc(x+s,y,s*0.7,0,Math.PI*2);ctx.arc(x+s*0.3,y+s*0.1,s*0.5,0,Math.PI*2);
+  ctx.fill();
+}
+function drawStartBg(){
+  const g=ctx.createLinearGradient(0,0,0,H);
+  g.addColorStop(0,'#0a0a1e');g.addColorStop(.5,'#1a1030');g.addColorStop(1,'#200a28');
+  ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+}
+
+// ===== Umbrella ring =====
+function drawUmbrella(){
+  if(phase!=='playing')return;
+  const cx=umbrellaX,cy=umbrellaY,r=umbrellaRadius;
+  // Outer glow
+  const g=ctx.createRadialGradient(cx,cy,r*.8,cx,cy,r*1.2);
+  g.addColorStop(0,'rgba(255,100,120,.0)');
+  g.addColorStop(.7,'rgba(255,100,120,.25)');
+  g.addColorStop(1,'rgba(255,68,85,0)');
+  ctx.fillStyle=g;ctx.beginPath();ctx.arc(cx,cy,r*1.25,0,Math.PI*2);ctx.fill();
+  // Red ring (umbrella canopy edge)
+  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  ctx.strokeStyle='rgba(220,40,50,.9)';ctx.lineWidth=7;ctx.stroke();
+  // Inner subtle glow ring
+  ctx.beginPath();ctx.arc(cx,cy,r-4,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,120,130,.35)';ctx.lineWidth=3;ctx.stroke();
+  // Umbrella ribs (subtle)
+  ctx.strokeStyle='rgba(200,30,40,.25)';ctx.lineWidth=1.5;
+  for(let i=0;i<6;i++){
+    const a=(i/6)*Math.PI*2-Math.PI/2;
+    ctx.beginPath();
+    ctx.moveTo(cx+Math.cos(a)*r*0.1,cy+Math.sin(a)*r*0.1);
+    ctx.lineTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r);
+    ctx.stroke();
+  }
+  // Top knot
+  ctx.fillStyle='#cc2233';
+  ctx.beginPath();ctx.arc(cx,cy-r+3,5,0,Math.PI*2);ctx.fill();
+}
+
+// ===== Rain tint overlay for whole canvas =====
+function drawRainOverlay(){
+  if(phase==='playing'){
+    // Global cool-blue tint
+    ctx.fillStyle='rgba(20,25,50,.12)';
+    ctx.fillRect(0,0,W,H);
+  }
+}
+
+// ===== Main loop =====
+function draw(){
+  // Background layers
+  if(phase==='end'){
+    drawEndingBg();
+  }else if(phase==='start'){
+    drawStartBg();
+  }else{
+    // Transition fade
+    let alpha=0;
+    if(sceneTransition){sceneTransitionT+=.04;alpha=sceneTransitionT;if(sceneTransitionT>1)alpha=1;}
+    ctx.save();
+    ctx.globalAlpha=1-alpha;
+    drawSceneOutside(1);
+    drawSceneInside();
+    drawRain();
+    ctx.restore();
+    // Fade black overlay during transition
+    if(alpha>0){ctx.fillStyle='rgba(10,10,25,'+alpha+')';ctx.fillRect(0,0,W,H);}
+  }
+  // Foreground
+  if(phase==='playing'){
+    drawGlow();
+    drawUmbrella();
+    drawRainOverlay();
+    updateRain();
+    updateGlow();
+  }
+  requestAnimationFrame(draw);
+}
+
+// ===== Load images =====
+(async()=>{
+  await Promise.all([
+    loadImage('street','./scenes/scene-street.jpg'),
+    loadImage('bus','./scenes/scene-bus-stop.jpg'),
+    loadImage('park','./scenes/scene-park-bench.jpg'),
+    loadImage('ending','./scenes/scene-ending.jpg'),
+  ]);
+  resize();
+  draw();
+})();
+
+// Init
+resize();
+
+})();
+</script>
+</body>
+</html>
