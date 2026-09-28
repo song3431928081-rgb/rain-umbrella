@@ -134,7 +134,7 @@ function resize(){
   cv.width=W*DPR;cv.height=H*DPR;
   cv.style.width=W+'px';cv.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  mirrorRadius=Math.min(W,H)*0.22;
+  mirrorRadius=Math.min(W,H)*0.30;
   if(phase==='playing'){
     if(mirrorX===undefined){mirrorX=W/2;mirrorY=H*0.55;}
   }
@@ -283,15 +283,19 @@ function updateSparkle(){
 
 // ===== Background rendering =====
 function drawBgOutside(){
-  // Draw dark image RAW — no filters, no overlays. AI image already designed for gloom.
+  // Draw dark image with cold-blue tint — maximize gloom contrast
   ctx.save();
   ctx.beginPath();
   ctx.rect(0,0,W,H);
   if(phase==='playing'){
     ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2,true); // inverted clip
   }
-  ctx.filter='none';
+  ctx.filter='grayscale(0.1) brightness(0.9) contrast(1.1)';
   drawSceneImage('dark');
+  ctx.filter='none';
+  // Cold blue-gray overlay to amplify gloom
+  ctx.fillStyle='rgba(30,45,70,0.18)';
+  ctx.fillRect(0,0,W,H);
   ctx.restore();
 }
 
@@ -301,8 +305,8 @@ function drawBgInside(){
   ctx.beginPath();
   ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2);
   ctx.clip();
-  // VIBRANT: max saturation, boosted brightness, crisp contrast
-  ctx.filter='grayscale(0) saturate(1.8) brightness(1.35) contrast(1.15)';
+  // VIBRANT: max saturation, boosted brightness, crisp contrast — punchy warmth
+  ctx.filter='grayscale(0) saturate(2.2) brightness(1.5) contrast(1.25)';
   drawSceneImage('warm');
   ctx.filter='none';
   // Warm firelight glow — center is golden, edges fade to amber
