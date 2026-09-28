@@ -79,9 +79,9 @@ let W,H,DPR;
 // ===== Scenes =====
 // Each scene has TWO different images: darkId (outside mirror — gray gloom) and warmId (inside mirror — vibrant beauty)
 const SCENES=[
-  {id:'street',  darkId:'dark-street',   warmId:'street',  title:'Scene I · The Lantern Alley',   quote:'"The lamp that still burns at midnight is waiting for someone."',       targetX:0.68, targetY:0.55},
-  {id:'bus',     darkId:'dark-bus-stop', warmId:'bus',     title:'Scene II · The Last Bus Stop',  quote:'"Those who wait together through the rain, hold each other tighter."', targetX:0.55, targetY:0.55},
-  {id:'park',    darkId:'dark-park-bench',warmId:'park',   title:'Scene III · The Empty Bench',   quote:'"One umbrella, two hearts — enough for the whole cold night."',        targetX:0.62, targetY:0.55},
+  {id:'street',  darkId:'dark-street',   warmId:'street',  title:'Scene I · The Lantern Alley',   quote:'"The lamp that still burns at midnight is waiting for someone."',       targetX:0.55, targetY:0.47},
+  {id:'bus',     darkId:'dark-bus-stop', warmId:'bus',     title:'Scene II · The Last Bus Stop',  quote:'"Those who wait together through the rain, hold each other tighter."', targetX:0.58, targetY:0.60},
+  {id:'park',    darkId:'dark-park-bench',warmId:'park',   title:'Scene III · The Empty Bench',   quote:'"One umbrella, two hearts — enough for the whole cold night."',        targetX:0.54, targetY:0.64},
 ];
 const ENDING={id:'ending',title:'Scene IV · After the Storm',quote:'"We cannot stop the storm, but we can become each other\'s shelter."',targetX:0.5,targetY:0.5};
 
@@ -134,7 +134,7 @@ function resize(){
   cv.width=W*DPR;cv.height=H*DPR;
   cv.style.width=W+'px';cv.style.height=H+'px';
   ctx.setTransform(DPR,0,0,DPR,0,0);
-  mirrorRadius=Math.min(W,H)*0.24;
+  mirrorRadius=Math.min(W,H)*0.30;
   if(phase==='playing'){
     if(mirrorX===undefined){mirrorX=W/2;mirrorY=H*0.55;}
   }
@@ -443,21 +443,20 @@ function drawMirror(){
   ctx.fillStyle=reflGrad;ctx.fillRect(cx-r,cy-r,r*2,r*2);
   ctx.restore();
 
-  // Golden frame rim (outer thick)
-  ctx.beginPath();ctx.arc(cx,cy,r,0,Math.PI*2);
+  // Golden frame rim — ALL drawn OUTSIDE the mirror clip so nothing obscures inner content
+  const fr=r+8; // frame sits 8px outside the mirror circle
+  ctx.beginPath();ctx.arc(cx,cy,fr,0,Math.PI*2);
   ctx.strokeStyle='#c89030';ctx.lineWidth=8;ctx.stroke();
-  // Golden highlight stroke (inner thinner)
-  ctx.beginPath();ctx.arc(cx,cy,r-5,0,Math.PI*2);
+  ctx.beginPath();ctx.arc(cx,cy,fr-5,0,Math.PI*2);
   ctx.strokeStyle='#e8b85a';ctx.lineWidth=3;ctx.stroke();
-  // Dark inner shadow stroke
-  ctx.beginPath();ctx.arc(cx,cy,r+5,0,Math.PI*2);
+  ctx.beginPath();ctx.arc(cx,cy,fr+5,0,Math.PI*2);
   ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=2;ctx.stroke();
 
-  // Ornate frame segments — 8 golden knobs around the mirror
+  // Ornate frame segments — 8 golden knobs outside the frame
   for(let i=0;i<8;i++){
     const a=(i/8)*Math.PI*2+t*0.1;
-    const kx=cx+Math.cos(a)*(r+6);
-    const ky=cy+Math.sin(a)*(r+6);
+    const kx=cx+Math.cos(a)*(fr+6);
+    const ky=cy+Math.sin(a)*(fr+6);
     ctx.fillStyle='#d4a040';
     ctx.beginPath();ctx.arc(kx,ky,4,0,Math.PI*2);ctx.fill();
     ctx.fillStyle='#fff0c0';
@@ -465,7 +464,7 @@ function drawMirror(){
   }
 
   // Top crown ornament
-  const crownX=cx, crownY=cy-r-10;
+  const crownX=cx, crownY=cy-fr-10;
   ctx.fillStyle='#c89030';
   ctx.beginPath();
   ctx.arc(crownX,crownY,5,0,Math.PI*2);ctx.fill();
