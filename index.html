@@ -283,17 +283,15 @@ function updateSparkle(){
 
 // ===== Background rendering =====
 function drawBgOutside(){
-  // Draw the dark image with minimal filter — the image is already gloomy by design
+  // Draw dark image RAW — no filters, no overlays. AI image already designed for gloom.
   ctx.save();
   ctx.beginPath();
   ctx.rect(0,0,W,H);
   if(phase==='playing'){
     ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2,true); // inverted clip
   }
-  // Very light desaturation — just enough to feel less colorful than mirror inside
-  ctx.filter='grayscale(0.25) saturate(0.7)';
-  drawSceneImage('dark');
   ctx.filter='none';
+  drawSceneImage('dark');
   ctx.restore();
 }
 
