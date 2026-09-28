@@ -283,33 +283,32 @@ function updateSparkle(){
 
 // ===== Background rendering =====
 function drawBgOutside(){
-  // Draw scene with EXTREME gloom — near-black, fully desaturated, heavy fog blur
+  // Draw scene with MILD gloom — visible but desaturated and cool
   ctx.save();
   ctx.beginPath();
   ctx.rect(0,0,W,H);
   if(phase==='playing'){
     ctx.arc(mirrorX,mirrorY,mirrorRadius,0,Math.PI*2,true); // inverted clip
   }
-  // EXTREME gloom: crush to near-dark, kill all color, blur like fog
-  ctx.filter='grayscale(1) saturate(0) brightness(0.12) contrast(0.9) blur(3px)';
+  // Mild gloom: keep brightness so details are visible, desaturate heavily, light cool tint
+  ctx.filter='grayscale(0.65) saturate(0.2) brightness(0.55) contrast(0.85)';
   drawSceneImage('dark');
   ctx.filter='none';
-  // Heavy cold-blue tint — makes outside feel cold and dead
-  ctx.fillStyle='rgba(8,12,28,.7)';ctx.fillRect(0,0,W,H);
-  // Drifting fog layers
+  // Light cold-blue tint — just enough to feel lonely, not enough to hide details
+  ctx.fillStyle='rgba(18,28,55,.32)';ctx.fillRect(0,0,W,H);
+  // Subtle fog (very light)
   const fogT=Date.now()*0.00015;
-  for(let i=0;i<3;i++){
-    const fy=H*(0.3+i*0.25)+Math.sin(fogT+i)*30;
-    const fg=ctx.createRadialGradient(W*(0.2+0.3*i)+Math.sin(fogT*2+i)*100,fy,0,W*(0.2+0.3*i),fy,W*0.4);
-    fg.addColorStop(0,'rgba(40,50,70,.18)');
-    fg.addColorStop(1,'rgba(40,50,70,0)');
+  for(let i=0;i<2;i++){
+    const fy=H*(0.35+i*0.3)+Math.sin(fogT+i)*30;
+    const fg=ctx.createRadialGradient(W*(0.25+0.3*i)+Math.sin(fogT*2+i)*80,fy,0,W*(0.25+0.3*i),fy,W*0.4);
+    fg.addColorStop(0,'rgba(40,55,80,.1)');
+    fg.addColorStop(1,'rgba(40,55,80,0)');
     ctx.fillStyle=fg;ctx.fillRect(0,0,W,H);
   }
-  // Strong vignette — corners feel oppressive
-  const vig=ctx.createRadialGradient(W/2,H/2,W*0.15,W/2,H/2,Math.max(W,H)*0.75);
+  // Very subtle vignette
+  const vig=ctx.createRadialGradient(W/2,H/2,W*0.2,W/2,H/2,Math.max(W,H)*0.75);
   vig.addColorStop(0,'rgba(0,0,0,0)');
-  vig.addColorStop(0.6,'rgba(0,0,0,.25)');
-  vig.addColorStop(1,'rgba(0,0,0,.6)');
+  vig.addColorStop(1,'rgba(0,0,0,.25)');
   ctx.fillStyle=vig;ctx.fillRect(0,0,W,H);
   ctx.restore();
 }
